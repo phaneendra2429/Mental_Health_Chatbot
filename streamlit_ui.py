@@ -1,5 +1,5 @@
 import streamlit as st
-from llm_generator import LLM_generator
+from llm_generator import llm_generator
 
 # ST : https://docs.streamlit.io/knowledge-base/tutorials/build-conversational-apps
 
@@ -11,10 +11,6 @@ with st.chat_message('user'):
 
 if st.button('Response') and user_prompt:
     with st.spinner("I'm thinking..."):
-        output = LLM_generator(user_prompt)
+        human_responses, ai_responses = llm_generator(user_prompt)
         with st.chat_message("assistant"):
-            # st.write("Hello human")
-            st.write(output)
-        with st.chat_message("user"):
-            st.write("Hello human")
-            #st.write(output)
+            st.write(ai_responses[-1])

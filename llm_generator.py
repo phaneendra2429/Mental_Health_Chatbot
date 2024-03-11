@@ -12,7 +12,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ChatMessageHistory,ConversationSummaryBufferMemory
 
 # LLM Generator
-from langchain.llms import CTransformers
+from langchain_community.llms import CTransformers
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 config = {'max_new_tokens': 256,
@@ -25,61 +25,78 @@ llm = CTransformers(model='W:\\Projects\\LangChain\\models\\quantizedGGUF-theBlo
                     callbacks=[StreamingStdOutCallbackHandler()],
                     config=config)
 
-
-# Define system and user message templates
-with open('.\\prompts\\system_message_template.txt', 'r') as file:
-    system_message_template = file.read().replace('\n', '')
-
-with open('.\\prompts\\user_message_template.txt', 'r') as file:
-    user_message_template = file.read().replace('\n', '')
-
-with open('.\\prompts\\condense_question_prompt.txt', 'r') as file:
-    condense_question_prompt = file.read().replace('\n', '')
-
-# Create message templates
-system_message = SystemMessagePromptTemplate.from_template(system_message_template)
-user_message = HumanMessagePromptTemplate.from_template(user_message_template)
-
-# Compile messages into a chat prompt template
-messages = [system_message, user_message]
-chatbot_prompt = ChatPromptTemplate.from_messages(messages)
-
-# array_of_files
+# Implement another function to pass an array of PDFs / CSVs / Excels
 from rag_pipeline import instantiate_rag
 retriever = instantiate_rag()
 
-history = ChatMessageHistory()
-# Provide the chat history when initializing the ConversationalRetrievalChain
-qa = ConversationalRetrievalChain.from_llm(
-    llm,
-    retriever=retriever,
-    memory = ConversationSummaryBufferMemory(
-        memory_key="chat_history",
-        input_key="question",
-        llm=llm,
-        max_token_limit=40,
-        return_messages=True
-    ),
-    return_source_documents=False,
-    chain_type="stuff",
-    max_tokens_limit=100,
-    condense_question_prompt= PromptTemplate.from_template(condense_question_prompt),
-    combine_docs_chain_kwargs={'prompt': chatbot_prompt},
-    verbose=True,
-    return_generated_question=False,
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    MessagesPlaceholder,
 )
+from langchain_core.messages import SystemMessage
 
-def LLM_generator(question: str):
-    answer = qa({"question": question,"chat_history":history.messages})["answer"]
-    print("##------##")
-    return answer
+from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationTokenBufferMemory
+# Docs:- https://python.langchain.com/docs/integrations/chat/llama2_chat
+from langchain_experimental.chat_models import Llama2Chat
+
+# Define system and user message templates
+with open('.\\prompts\\system_message_template.txt', 'r') as file:
+            system_message_template = file.read().replace('\n', '')
+
+template_messages = [
+    SystemMessage(content=system_message_template),
+    MessagesPlaceholder(variable_name="chat_history"),
+    HumanMessagePromptTemplate.from_template("{text}"),
+]
+prompt_template = ChatPromptTemplate.from_messages(template_messages)
+
+model = Llama2Chat(llm=llm)
+
+memory = ConversationTokenBufferMemory(llm=llm, memory_key="chat_history", return_messages=True, max_token_limit=50)
+chain = LLMChain(llm=model, prompt=prompt_template, memory=memory, verbose=False)
+
+# Decide wether to place this in streamlit.py
+# or make a new post_process.py and import that to streamlit
+def extract_dialogues(text):
+    '''
+    returns a two lists for human and ai dialogues,
+    '''
+    human_dialogues = []
+    ai_dialogues = []
+    lines = text.split('\n')
+
+    # Iterate through each line
+    for line in lines:
+        # Remove leading and trailing whitespace
+        line = line.strip()
+
+        # Check if the line starts with 'Human:' or 'AI:'
+        if line.startswith('Human:'):
+            # Extract the text after 'Human:'
+            human_dialogues.append(line[len('Human:'):].strip())
+        elif line.startswith('AI:'):
+            # Extract the text after 'AI:'
+            ai_dialogues.append(line[len('AI:'):].strip())
+    return human_dialogues, ai_dialogues
+
+human_responses_for_classification = [] 
+def llm_generator(question):
+    chain.invoke(input=question)
+    human_responses, ai_responses = extract_dialogues(memory.buffer_as_str)
+    human_responses_for_classification = human_responses # extracting the content of the local variable to global variable
+    return human_responses, ai_responses
 
 # Implement Classification
-
+all_user_inputs = ''.join(human_responses_for_classification)
 from nlp_models import sentiment_class, pattern_classification, corelation_analysis
-
-is_depressed = sentiment_class(conversation_buffer)
+is_depressed = sentiment_class(all_user_inputs)
 
 if is_depressed[0][1] > 0.5:
     print('Not so depressed')
 else: print('is_depressed')
+
+# WIP
+# Works but Not-Optimized
