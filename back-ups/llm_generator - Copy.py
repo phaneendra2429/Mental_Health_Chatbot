@@ -49,8 +49,7 @@ template_messages = [
 prompt_template = ChatPromptTemplate.from_messages(template_messages)
 
 model = Llama2Chat(llm=llm)
-# ConversationTokenBuffer
-memory = ConversationBufferMemory(llm=llm, memory_key="chat_history", return_messages=True)
+memory = ConversationTokenBufferMemory(llm=llm, memory_key="chat_history", return_messages=True, max_token_limit=50)
 chain = LLMChain(llm=model, prompt=prompt_template, memory=memory, verbose=False)
 
 # Decide wether to place this in streamlit.py
@@ -84,12 +83,7 @@ def llm_generation(question):
     global human_responses, ai_responses
     print(chain.invoke(input=question))
     human_responses, ai_responses = extract_dialogues(memory.buffer_as_str)
-    return memory.buffer_as_str
-
-def update_list():
-    global human_responses, ai_responses
-    human_responses, ai_responses = extract_dialogues(memory.buffer_as_str)
-    return 'responses updated'  
+    return None     
 
 def is_depressed():
     # Implement Classification

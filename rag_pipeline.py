@@ -22,12 +22,11 @@ from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTe
 loader = PyMuPDFLoader(".\\Data\\PDFs\\DepressionGuide-web.pdf")
 documents  = loader.load()
 
-# create the open-source embedding function
+# Create the open-source embedding function
 # Docs:- https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
 embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
 # https://python.langchain.com/docs/modules/data_connection/retrievers/parent_document_retriever
-
 parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
 
 # This text splitter is used to create the child documents
@@ -42,6 +41,12 @@ vectorstore = Chroma(
 store = InMemoryStore()
 
 def instantiate_rag():
+    '''
+    returns a retriver after loading the documents.
+    currently loads only the PDFs mentioned in 'loader' above
+    take list of PDFs / CSVs / Excels / Databases as arguments from the original call to function and pass below
+    functional code 101!
+    '''
     rag_retriever = ParentDocumentRetriever(
         vectorstore=vectorstore,
         docstore=store,
