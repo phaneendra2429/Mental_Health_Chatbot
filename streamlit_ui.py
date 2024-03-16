@@ -1,45 +1,21 @@
 import streamlit as st
-from llm_generator import llm_generation, update_list
 import llm_generator
+from llm_generator import llm_generation
 
-import random
 import time
 
 # ST : https://docs.streamlit.io/knowledge-base/tutorials/build-conversational-apps
 
 st.title('Therapist')
 
-def response_generator():
+def response_generator(response):
     '''
     responds the text with a type writter effect
     '''
-    response_buffer = llm_generator.ai_responses[-1]
+    response_buffer = response.strip()
     for word in response_buffer.split():
         yield word + " "
         time.sleep(0.1)
-
-# Dont need this function here anymore
-def extract_dialogues(text):
-    '''
-    returns a two lists for human and ai dialogues,
-    '''
-    human_dialogues = []
-    ai_dialogues = []
-    lines = text.split('\n')
-
-    # Iterate through each line
-    for line in lines:
-        # Remove leading and trailing whitespace
-        line = line.strip()
-
-        # Check if the line starts with 'Human:' or 'AI:'
-        if line.startswith('Human:'):
-            # Extract the text after 'Human:'
-            human_dialogues.append(line[len('Human:'):].strip())
-        elif line.startswith('AI:'):
-            # Extract the text after 'AI:'
-            ai_dialogues.append(line[len('AI:'):].strip())
-    return human_dialogues, ai_dialogues
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -56,11 +32,8 @@ if user_prompt := st.chat_input("Hello, How are you doing today"):
         st.markdown(user_prompt)
 
     with st.chat_message("assistant"):
-        llm_generation(user_prompt)
-        time.sleep(2)
-        update_list()
-        time.sleep(2)
-        response = st.write_stream(response_generator())
-        #st.write(response)
+        response = llm_generation(user_prompt)
+        time.sleep(1)
+        st.write_stream(response_generator(response))
         
     st.session_state.messages.append({"role": "assistant", "content": response})
