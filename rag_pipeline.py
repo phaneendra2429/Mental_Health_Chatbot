@@ -3,7 +3,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.embeddings.sentence_transformer import (
     SentenceTransformerEmbeddings,
 )
-
+import os
 from langchain.storage import InMemoryStore
 from langchain_community.document_loaders import TextLoader
 
@@ -19,7 +19,10 @@ from langchain_text_splitters import CharacterTextSplitter, RecursiveCharacterTe
 # df_counsellor_chats = pd.read_excel("/content/drive/MyDrive/Team 5/Depression_dataset_preprocessed (1).xlsx", sheet_name= "Counsellor_Chats")
 # df_human_therapist = pd.read_excel("/content/drive/MyDrive/Team 5/Depression_dataset_preprocessed (1).xlsx", sheet_name= "99_rows_Human_&_Therapist")
 
-loader = PyMuPDFLoader(".\\Data\\PDFs\\DepressionGuide-web.pdf")
+# Get the directory path of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+loader = PyMuPDFLoader(os.path.join(script_dir, 'Data','pdf', 'DepressionGuide-web.pdf'))
 documents  = loader.load()
 
 # create the open-source embedding function
