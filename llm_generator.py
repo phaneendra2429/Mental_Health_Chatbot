@@ -21,18 +21,18 @@ from langchain_experimental.chat_models import Llama2Chat
 # Docs:- https://python.langchain.com/docs/integrations/chat/llama2_chat
 
 
-HUGGINGFACEHUB_API_TOKEN = HF_ACCESS_TOKEN
-#os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
+HUGGINGFACEHUB_API_TOKEN =  "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" #HF_ACCESS_TOKEN
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
 
 # Implement another function to pass an array of PDFs / CSVs / Excels
-from rag_pipeline import instantiate_rag
-retriever = instantiate_rag()
+#from rag_pipeline import instantiate_rag
+#retriever = instantiate_rag()
 
-#persist_directory="Data/chroma"
+persist_directory="Data/chroma"
 #chroma_client = chromadb.PersistentClient(persist_directory=persist_directory)
-#embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-#vectors = Chroma(persist_directory = persist_directory, embedding_function = embedding_function)
-#retriever = vectors.as_retriever() #(k=6)
+embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+vectors = Chroma(persist_directory = persist_directory, embedding_function = embedding_function, collection_name="split_parents")
+retriever = vectors.as_retriever() #(k=6)
 
 
 # Set the url to your Inference Endpoint below
@@ -56,7 +56,7 @@ llm = HuggingFaceEndpoint(
 )
 
 
-model = Llama2Chat(llm=llm)
+#model = Llama2Chat(llm=llm)
 memory = ConversationBufferMemory(
     llm=llm, 
     memory_key="chat_history",
@@ -75,10 +75,14 @@ If you cannot find the answer from the pieces of context, just say that you don'
 ----------------
 {context}"""
 
+human_message_template = """User Query: {question} Answer:"""
+
 messages = [
 SystemMessagePromptTemplate.from_template(system_message_template),
-HumanMessagePromptTemplate.from_template("{question}")
+#HumanMessagePromptTemplate.from_template("{question}")
+HumanMessagePromptTemplate.from_template(human_message_template)
 ]
+
 qa_prompt = ChatPromptTemplate.from_messages(messages)
 qa_prompt.pretty_print()
 
@@ -101,7 +105,7 @@ retrieval_chain = ConversationalRetrievalChain.from_llm(
     memory = memory,
     return_source_documents=False,
     verbose=True,
-    #condense_question_prompt=condense_question_prompt,
+    condense_question_prompt=condense_question_prompt,
     # chain_type = "stuff",
     combine_docs_chain_kwargs={'prompt': qa_prompt}, # https://github.com/langchain-ai/langchain/issues/6879
 )

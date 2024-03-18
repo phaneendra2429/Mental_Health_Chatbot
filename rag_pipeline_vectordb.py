@@ -82,7 +82,7 @@ def generate_pdf_vector_db() -> None:
 
 def vectordb_load():     
     # call csv loader
-    generate_csv_vector_db()
+    #generate_csv_vector_db()
 
     # call PDF loader
     generate_pdf_vector_db()
