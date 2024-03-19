@@ -1,6 +1,6 @@
 import streamlit as st
-import llm_generator
-from llm_generator import llm_generation
+import update_llmgen
+from update_llmgen import llm_generation
 
 import time
 

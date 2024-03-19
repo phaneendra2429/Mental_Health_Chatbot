@@ -21,7 +21,7 @@ from langchain_experimental.chat_models import Llama2Chat
 # Docs:- https://python.langchain.com/docs/integrations/chat/llama2_chat
 
 
-HUGGINGFACEHUB_API_TOKEN = HF_ACCESS_TOKEN
+HUGGINGFACEHUB_API_TOKEN = "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" #HF_ACCESS_TOKEN
 #os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
 
 # Implement another function to pass an array of PDFs / CSVs / Excels
