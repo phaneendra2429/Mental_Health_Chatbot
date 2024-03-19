@@ -37,9 +37,10 @@ parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
 # It should create documents smaller than the parent
 child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
 
+persist_directory="Data/chroma"
 # The vectorstore to use to index the child chunks
 vectorstore = Chroma(
-    collection_name="split_parents", embedding_function=embedding_function)
+    collection_name="split_parents", embedding_function=embedding_function, persist_directory=persist_directory)
 
 # The storage layer for the parent documents
 store = InMemoryStore()
@@ -53,3 +54,7 @@ def instantiate_rag():
     )
     rag_retriever.add_documents(documents)
     return rag_retriever
+
+
+#call the above method
+instantiate_rag()
