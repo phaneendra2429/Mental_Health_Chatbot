@@ -29,11 +29,12 @@ llm = HuggingFaceEndpoint(
 )
 ch = ChatMessageHistory()
 memory = ConversationBufferMemory(
-    llm=llm, 
+    # llm=llm, 
     memory_key="chat_history",
     return_messages=True,
-    output_key='answer',
-    input_key='question')
+    # output_key='answer',
+    input_key='question'
+    )
 condense_question = """Given the following conversation and a follow-up message,
 rephrase the follow-up message to a stand-alone question or instruction that
 represents the user's intent precisely, add context needed if necessary to generate a complete and
@@ -48,11 +49,11 @@ condense_question_prompt = PromptTemplate.from_template(condense_question)
 condense_question_prompt.pretty_print()
 
 system_message_template = """You're a Mental Health Specialist. Support those with Depressive Disorder.
-Listen compassionately, respond helpfully. For casual talk, be friendly. For facts, use context.
+Listen compassionately, ask a followup question to understand the situaltion of the user. For casual talk, be friendly. For facts, use context.
 If unsure, say, 'Out of my knowledge.' Always stay direct.
 If you cannot find the answer from the pieces of context, just say that you don't know, don't try to make up an answer.
 ----------------
-{context}"""
+{question}"""
 
 human_message_template = """User Query: {question} Answer:"""
 
@@ -83,20 +84,38 @@ retriever = vectorstore.as_retriever()
 #     retriever=retriever,
 #     question_generator=llm_chain
 # )
-retrieval_chain = ConversationalRetrievalChain.from_llm(
-    llm = llm,
-    retriever=retriever,
-    memory = memory,
-    return_source_documents=False,
-    verbose=True,
-    condense_question_prompt=condense_question_prompt,
-    # chain_type = "stuff",
-    combine_docs_chain_kwargs={'prompt': qa_prompt} # https://github.com/langchain-ai/langchain/issues/6879
-)
+
+
+# Define a prompt template
+prompt_template = """ ask a followup question to understand more about the situation.
+----------------
+{question}"""
+prompt = PromptTemplate.from_template(prompt_template)
+
+# Instantiate an LLMChain object with OpenAI as the language model and the prompt
+llm_ch= LLMChain(llm=llm, prompt=prompt, memory=memory)
+
+
+
+# retrieval_chain = ConversationalRetrievalChain.from_llm(
+#     llm = llm,
+#     retriever=retriever,
+#     memory = memory,
+#     return_source_documents=False,
+#     verbose=True,
+#     condense_question_prompt=condense_question_prompt,
+#     # chain_type = "stuff",
+#     combine_docs_chain_kwargs={'prompt': qa_prompt} # https://github.com/langchain-ai/langchain/issues/6879
+# )
+
+
+# template = f"""I hear you're feeling {emotion}. Can you tell me more about what's going on?"""
+
+# response = llm_chain.run(template)
 
 history=ChatMessageHistory()
 def llm_generation(question: str):
-    llm_answer = retrieval_chain.invoke({'question':question, 'chat_history':history.messages})['answer'] #Answer = Dict Key = Latest response by the AI
+    llm_answer = llm_ch.run({'question':question, 'chat_history':history.messages}) #Answer = Dict Key = Latest response by the AI
     history.add_user_message(question)
     history.add_ai_message(llm_answer)
     return llm_answer

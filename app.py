@@ -40,7 +40,8 @@ if user_prompt := st.chat_input("Please tell me about your mental health conditi
 
     with st.chat_message("assistant"):
         response = llm_generation(user_prompt)
-        time.sleep(0.2)
-        st.write_stream(response_generator(response))
+        # time.sleep(0.2)
+        # st.write_stream(response_generator(response))
+        st.markdown(response)
         
     st.session_state.messages.append({"role": "assistant", "content": response})
