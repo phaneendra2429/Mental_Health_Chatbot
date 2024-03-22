@@ -43,13 +43,15 @@ Current conversation:
 {history}
 Human: {input}
 AI Assistant:"""
-PROMPT = PromptTemplate(input_variables=["history", "input"], template=template)
-# memory=ConversationBufferMemory()
+
+PROMPT = PromptTemplate(input_variables=["history","input"], template=template)
+memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=100, return_messages=True)
+# memory.save_context({"input": "hi"}, {"output": "whats up"})
+# memory.save_context({"input": "not much you"}, {"output": "not much"})
+# memory.save_context({"input": "feeling sad"}, {"output": "I am happy you feel that way"})
 conversation = ConversationChain(
     prompt=PROMPT,
-    llm=llm,
-    verbose=True,
-    memory=ConversationSummaryBufferMemory(llm=llm)  
+    llm=llm
 )
 
 # memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=10)
@@ -72,7 +74,7 @@ col1, col2 = st.columns([2, 3])
 def update_recommendations(new_content):
     with col1:
         st.header("Recommendation")
-        st.write(new_content.memory.load_memory_variables({}))  # Update the content with new_content
+        st.write(new_content)  # Update the content with new_content
 
 
 
@@ -109,13 +111,14 @@ with col2:
 
         with st.chat_message("assistant"):
             response = conversation.predict(input=user_prompt)
-            # memory.save_context({"input": user_prompt}, {"output":response})
-            # print(conversation.memory.load_memory_variables())
+            print("this is a datatype",type(user_prompt))
+            memory.save_context({"input": user_prompt}, {"output": response})
+            print("this is a streamlit", [message['content'] for message in st.session_state.messages])
             time.sleep(0.2)
             st.write_stream(response_generator(response))
             # Update recommendations based on the assistant's response (replace with your logic)
             # new_recommendations = "Here are some updated recommendations based on the assistant's reply: ..."  # Modify this line
-            update_recommendations(conversation)
+            update_recommendations([message['content'] for message in st.session_state.messages])
             
         st.session_state.messages.append({"role": "assistant", "content": response})
         
