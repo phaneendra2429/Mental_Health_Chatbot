@@ -10,7 +10,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 ) 
-from langchain.memory import ChatMessageHistory, ConversationSummaryBufferMemory, ConversationBufferMemory
+from langchain.memory import ChatMessageHistory, ConversationSummaryBufferMemory, ConversationBufferMemory, ConversationSummaryMemory
 from langchain.chains import LLMChain, ConversationChain
 
 HUGGINGFACEHUB_API_TOKEN ="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"
@@ -45,10 +45,11 @@ Human: {input}
 AI Assistant:"""
 
 PROMPT = PromptTemplate(input_variables=["history","input"], template=template)
-memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=100, return_messages=True)
+memory = ConversationSummaryMemory(llm=llm)
 # memory.save_context({"input": "hi"}, {"output": "whats up"})
 # memory.save_context({"input": "not much you"}, {"output": "not much"})
 # memory.save_context({"input": "feeling sad"}, {"output": "I am happy you feel that way"})
+
 conversation = ConversationChain(
     prompt=PROMPT,
     llm=llm
@@ -71,10 +72,10 @@ st.set_page_config(layout="wide")
 col1, col2 = st.columns([2, 3])
 
 # Function to update recommendations in col1
-def update_recommendations(new_content):
+def update_recommendations():
     with col1:
         st.header("Recommendation")
-        st.write(new_content)  # Update the content with new_content
+        st.write(st.session_state.messages)  # Update the content with new_content
 
 
 
@@ -111,14 +112,13 @@ with col2:
 
         with st.chat_message("assistant"):
             response = conversation.predict(input=user_prompt)
-            print("this is a datatype",type(user_prompt))
-            memory.save_context({"input": user_prompt}, {"output": response})
-            print("this is a streamlit", [message['content'] for message in st.session_state.messages])
+            print(conversation.memory.buffer)
             time.sleep(0.2)
             st.write_stream(response_generator(response))
             # Update recommendations based on the assistant's response (replace with your logic)
             # new_recommendations = "Here are some updated recommendations based on the assistant's reply: ..."  # Modify this line
-            update_recommendations([message['content'] for message in st.session_state.messages])
+            print(conversation.memory.buffer)
+            update_recommendations()
             
         st.session_state.messages.append({"role": "assistant", "content": response})
         
