@@ -1,0 +1,17 @@
+#create new env
+#conda create --name LLM_chatbot
+#activate the env
+#conda activate LLM_chatbot
+#pip install -r requirements.txt
+#if streamlit is still unrecognized run this "conda install -c conda-forge streamlit"
+#to run stremlit use streamlit run streamlit_ui.py
+langchain==0.1.11
+torch==2.0.1
+transformers==4.36.2
+langchain-community==0.0.27
+streamlit==1.32.2
+ctransformers==0.2.27
+pymupdf==1.23.26
+sentence-transformers==2.5.1
+chromadb==0.4.24
+langchain_experimental
