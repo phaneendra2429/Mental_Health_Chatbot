@@ -46,6 +46,7 @@ def get_recommendations():
 # with col2:
 st.title('Mental Health Counseling Chatbot')
 # ... (rest of your code for chatbot functionality) ...
+
 def response_generator(response):
     '''
     responds the text with a type writter effect
@@ -54,6 +55,10 @@ def response_generator(response):
     for word in response_buffer.split():
         yield word + " "
         time.sleep(0.05)
+
+with st.chat_message("assistant"):
+    time.sleep(0.2)
+    st.markdown("I am your Personal Therapist, How are you doing today?")  
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -68,9 +73,8 @@ for message in st.session_state.messages:
 
 # Accept user input
 #if user_prompt := st.chat_input("Hello, How are you doing today"):
-with st.chat_message("assistant"):
-    time.sleep(0.2)
-    st.write_stream(response_generator("I am your Personal Therapist, How are you doing today?"))        
+ 
+
 if user_prompt := st.chat_input("Please tell me about your mental health condition and we can explore together potential advice that could help you."):
     st.session_state.messages.append({"role": "user", "content": user_prompt})
     with st.chat_message("user"):

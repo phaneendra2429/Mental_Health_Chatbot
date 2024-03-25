@@ -47,8 +47,7 @@ llm = HuggingFaceEndpoint(
 # print(conversation.predict(input="I am alone at home"))
 # print(conversation.memory.buffer)
 query2 = " "
-def convo(query):
-    template = """Act as a therapist, and conduct therapy sessions with the user. Your goal analyse their mental health 
+template = """Act as a therapist, and conduct therapy sessions with the user. Your goal analyse their mental health 
     problem, based following input:{input}. Do not show your thought process, only output a single question. 
     Your output should contain consolation related to the query and a single question. Only ask one question at a time.
 
@@ -57,23 +56,26 @@ def convo(query):
     Human: {input}
     AI Assistant:"""
 
-    PROMPT = PromptTemplate(input_variables=["history","input"], template=template)
-    memory = ConversationBufferMemory(llm=llm)
+PROMPT = PromptTemplate(input_variables=["history","input"], template=template)
+memory = ConversationBufferMemory(llm=llm)
     # memory.save_context({"input": "hi"}, {"output": "whats up"})
     # memory.save_context({"input": "not much you"}, {"output": "not much"})
     # memory.save_context({"input": "feeling sad"}, {"output": "I am happy you feel that way"})
 
-    conversation = ConversationChain(
+conversation = ConversationChain(
         prompt=PROMPT,
         llm=llm,
         memory=memory,
         verbose=True
     )
+def convo(query):
+    global conversation
+    
     response = conversation.predict(input=query)
     # memory.save_context({"input": query}, {"output": ""})
     global query2
     query2 = query2 + "," + query
-    print("\n ChatBOt.py----------",conversation.memory.buffer)
+    print("\n ChatBOt.py----------",memory.chat_memory)
     summary = query2
     return response, summary
 
