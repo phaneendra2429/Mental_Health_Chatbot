@@ -58,7 +58,7 @@ def convo(query):
     AI Assistant:"""
 
     PROMPT = PromptTemplate(input_variables=["history","input"], template=template)
-    memory = ConversationSummaryMemory(llm=llm)
+    memory = ConversationBufferMemory(llm=llm)
     # memory.save_context({"input": "hi"}, {"output": "whats up"})
     # memory.save_context({"input": "not much you"}, {"output": "not much"})
     # memory.save_context({"input": "feeling sad"}, {"output": "I am happy you feel that way"})
@@ -66,13 +66,14 @@ def convo(query):
     conversation = ConversationChain(
         prompt=PROMPT,
         llm=llm,
-        memory=memory
+        memory=memory,
+        verbose=True
     )
     response = conversation.predict(input=query)
     # memory.save_context({"input": query}, {"output": ""})
     global query2
     query2 = query2 + "," + query
-    print("\n ChatBOt.py----------",query2)
+    print("\n ChatBOt.py----------",conversation.memory.buffer)
     summary = query2
     return response, summary
 
