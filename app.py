@@ -85,7 +85,7 @@ if user_prompt := st.chat_input("Please tell me about your mental health conditi
         # print(conversation.memory.buffer)
         time.sleep(0.2)
         st.write_stream(response_generator(response))
-        # print(conversation.memory.buffer)
+        print("This is the response from app.py",response)
         update_recommendations(summary)
         
     st.session_state.messages.append({"role": "assistant", "content": response})
