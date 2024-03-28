@@ -20,9 +20,13 @@ from langchain.memory import ChatMessageHistory, ConversationSummaryBufferMemory
 from langchain_experimental.chat_models import Llama2Chat
 # Docs:- https://python.langchain.com/docs/integrations/chat/llama2_chat
 
+from dotenv import load_dotenv, find_dotenv
 
-HUGGINGFACEHUB_API_TOKEN =  "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" #HF_ACCESS_TOKEN
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
+
+#HUGGINGFACEHUB_API_TOKEN =  "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" #HF_ACCESS_TOKEN
+# Please ensure you have a .env file available with 'HUGGINGFACEHUB_API_TOKEN' and 'OPENAI_API_KEY' values.
+load_dotenv(find_dotenv())
+HUGGINGFACEHUB_API_TOKEN  =os.environ["HUGGINGFACEHUB_API_TOKEN"]
 
 # Implement another function to pass an array of PDFs / CSVs / Excels
 #from rag_pipeline import instantiate_rag
