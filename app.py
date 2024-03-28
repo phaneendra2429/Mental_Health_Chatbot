@@ -14,7 +14,9 @@ from langchain.memory import ChatMessageHistory, ConversationSummaryBufferMemory
 from langchain.chains import LLMChain, ConversationChain
 from chatbot import convo
 from recommend import recommend2
+from recommend import is_depressed
 from functools import cached_property
+
 
 st.set_page_config(layout="wide")
 
@@ -33,7 +35,8 @@ def update_recommendations(sum):
         st.header("Recommendation")
         recommend = recommend2(sum)  # Assuming recommend2 doesn't require input
         st.write(recommend)
-    
+        st.divider()
+        st.write("User Status:",is_depressed(sum))
         # Add refresh button (simulated)
         if st.button("Refresh Chat"):
             st.rerun()

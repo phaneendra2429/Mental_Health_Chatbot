@@ -12,7 +12,8 @@ from langchain.chains import LLMChain
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.chains.question_answering import load_qa_chain
 from langchain import PromptTemplate
-
+# from nlp_models import sentiment_class
+from transformers import pipeline
 
 
 HUGGINGFACEHUB_API_TOKEN ="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"
@@ -72,3 +73,17 @@ def recommend2(query):
     return result["answer"]
 
 # print(recommend2("i am feeling sad"))
+
+def is_depressed(human_inputs):
+    ''''
+    returns wether according to human inputs the person is depressed or not
+    '''
+    # Implement Classification
+    # all_user_inputs = ''.join(human_inputs)
+    pipe = pipeline('sentiment-analysis')
+    status = pipe(human_inputs)
+    return 'Is depressed' if status[0]["label"] == "NEGATIVE" else ' not Depressed'
+    # return status[0]["label"]
+
+
+
